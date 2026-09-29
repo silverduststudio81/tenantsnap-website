@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TenantSnap — move-in inspection for renters</title>
-  <meta name="description" content="Walk each room, take the guided photos, note any damage by voice, and send your landlord a dated, tamper-evident PDF report. Works offline. No account.">
+  <meta name="description" content="Walk each room, take the guided photos, note any damage by voice, and send your landlord a dated, tamper-evident PDF report. Works offline. No account. For iPhone and Android.">
   <link rel="icon" href="icon.png">
   <link rel="preload" href="fonts/plus-jakarta-sans-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
@@ -26,10 +26,16 @@
         <div>
           <h1>Your photos today decide your deposit tomorrow.</h1>
           <p class="lede">TenantSnap walks you through your new home room by room, then turns your photos and notes into a dated, tamper-evident PDF you can send to your landlord the same day.</p>
-          <a class="store-badge" href="#" aria-label="Download on the App Store (coming soon)">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2-1.1 2.8-2.3.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-.9-2.5-3.7zM14.1 5.6c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3z"/></svg>
-            Coming soon to the App Store
-          </a>
+          <div class="badges">
+            <a class="store-badge" href="#" aria-label="Download on the App Store (coming soon)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2-1.1 2.8-2.3.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-.9-2.5-3.7zM14.1 5.6c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3z"/></svg>
+              Coming soon to the App Store
+            </a>
+            <a class="store-badge" href="#" aria-label="Get it on Google Play (coming soon)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v17a1 1 0 0 0 1.5.86l14.2-8.5a1 1 0 0 0 0-1.72L6.5 2.64A1 1 0 0 0 5 3.5z"/></svg>
+              Coming soon on Google Play
+            </a>
+          </div>
           <p class="price-note">Free inspection. Unlock the PDF with a one-time purchase. No subscription.</p>
         </div>
 
@@ -58,28 +64,51 @@
       </div>
     </section>
 
+    <section class="band band-moving" aria-label="Moving day: boxes and a set of keys in an empty living room">
+      <picture>
+        <source media="(max-width: 820px)" srcset="img/band-moving-960.jpg">
+        <img src="img/band-moving.jpg" alt="Moving day: boxes and a set of keys in an empty living room" width="1920" height="1080" loading="lazy" decoding="async">
+      </picture>
+      <div class="wrap"><p class="band-line">Moving day is busy.<br>Your record takes 20&nbsp;minutes.</p></div>
+    </section>
+
     <section>
       <div class="wrap">
         <h2>A proper inspection in about 20 minutes</h2>
         <p class="intro">No clipboard, no guessing what to photograph. The app knows which shots each room needs.</p>
-        <ol class="steps">
+        <div class="platform-switch" role="group" aria-label="Show the app on">
+          <button type="button" data-platform="ios" aria-pressed="true">iPhone</button>
+          <button type="button" data-platform="android" aria-pressed="false">Android</button>
+        </div>
+        <ol class="steps" data-show="ios">
           <li>
-            <img class="screen" src="img/screen-walk.jpg" alt="The camera screen: the checklist shows the next shot to take" width="600" height="1303" loading="lazy">
+            <img class="screen" data-os="ios" src="img/ios-walk.jpg" alt="iPhone: The camera screen: the checklist shows the next shot to take" width="600" height="1304" loading="lazy">
+            <img class="screen" data-os="android" src="img/android-walk.jpg" alt="Android: The camera screen: the checklist shows the next shot to take" width="600" height="1261" loading="lazy">
             <h3>Walk each room</h3>
             <p>Follow the checklist: walls, floor, windows, fixtures. Meters, keys and smoke alarms get their own step.</p>
           </li>
           <li>
-            <img class="screen" src="img/screen-issue.jpg" alt="Adding an issue: a photo of a scuff with a typed note" width="600" height="1303" loading="lazy">
+            <img class="screen" data-os="ios" src="img/ios-issue.jpg" alt="iPhone: Adding an issue: a photo of a chipped door frame with a typed note" width="600" height="1304" loading="lazy">
+            <img class="screen" data-os="android" src="img/android-issue.jpg" alt="Android: Adding an issue: a photo of a chipped door frame with a typed note" width="600" height="1261" loading="lazy">
             <h3>Note what's wrong</h3>
             <p>Spot a scuff or a crack? Tap Issue, take the photo and describe it by typing or speaking.</p>
           </li>
           <li>
-            <img class="screen" src="img/screen-sent.jpg" alt="After sending: the report, your backup and their reply tracked in one place" width="600" height="1303" loading="lazy">
+            <img class="screen" data-os="ios" src="img/ios-sent.jpg" alt="iPhone: After sending: the report, your backup and their reply tracked in one place" width="600" height="1304" loading="lazy">
+            <img class="screen" data-os="android" src="img/android-sent.jpg" alt="Android: After sending: the report, your backup and their reply tracked in one place" width="600" height="1261" loading="lazy">
             <h3>Send the report</h3>
             <p>Sign, then send the PDF by email or WhatsApp. Your sent email becomes an independent date.</p>
           </li>
         </ol>
       </div>
+    </section>
+
+    <section class="band band-photo" aria-label="Taking a photo of a wall with a phone in an empty flat">
+      <picture>
+        <source media="(max-width: 820px)" srcset="img/band-photo-960.jpg">
+        <img src="img/band-photo.jpg" alt="Taking a photo of a wall with a phone in an empty flat" width="1920" height="1080" loading="lazy" decoding="async">
+      </picture>
+      <div class="wrap"><p class="band-line">Every photo is dated and fingerprinted<br>the moment you take it.</p></div>
     </section>
 
     <section class="report">
@@ -106,10 +135,18 @@
 
     <section class="private">
       <div class="wrap">
-        <h2>Everything stays on your iPhone</h2>
-        <p>No account, no sign-up, no cloud. Photos, notes and dictation stay on your phone until you choose to send the report. It works offline, so an empty flat with no signal is fine. Back up to Files or iCloud Drive whenever you like.</p>
+        <h2>Everything stays on your phone</h2>
+        <p>No account, no sign-up, no cloud. Photos, notes and dictation stay on your phone until you choose to send the report. It works offline, so an empty flat with no signal is fine. Back up whenever you like: to Files or iCloud Drive on iPhone, to Google Drive or any folder on Android.</p>
         <p><a href="privacy.html">Read the privacy policy</a></p>
       </div>
+    </section>
+
+    <section class="band band-moveout" aria-label="Move-out: keys left on a clean kitchen worktop">
+      <picture>
+        <source media="(max-width: 820px)" srcset="img/band-moveout-960.jpg">
+        <img src="img/band-moveout.jpg" alt="Move-out: keys left on a clean kitchen worktop" width="1920" height="1080" loading="lazy" decoding="async">
+      </picture>
+      <div class="wrap"><p class="band-line">Leave with proof.<br>Get your deposit back.</p></div>
     </section>
 
     <section class="price">
@@ -119,7 +156,10 @@
             <h2>Inspect for free</h2>
             <p>Unlock the PDF export with a one-time purchase. Keep it for every rental you inspect.</p>
           </div>
-          <a class="store-badge" href="#">Coming soon to the App Store</a>
+          <div class="badges">
+            <a class="store-badge" href="#">Coming soon to the App Store</a>
+            <a class="store-badge" href="#">Coming soon on Google Play</a>
+          </div>
         </div>
       </div>
     </section>
@@ -134,5 +174,24 @@
       </nav>
     </div>
   </footer>
+  <script>
+    // iPhone | Android screenshots: start on the visitor's phone, remember their choice.
+    (function () {
+      var steps = document.querySelector('.steps'), buttons = document.querySelectorAll('.platform-switch button');
+      function show(os) {
+        steps.setAttribute('data-show', os);
+        buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.platform === os)); });
+      }
+      var saved = null;
+      try { saved = localStorage.getItem('platform'); } catch (e) {}
+      show(saved || (/android/i.test(navigator.userAgent) ? 'android' : 'ios'));
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          show(b.dataset.platform);
+          try { localStorage.setItem('platform', b.dataset.platform); } catch (e) {}
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

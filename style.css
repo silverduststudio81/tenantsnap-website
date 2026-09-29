@@ -131,6 +131,27 @@ section .intro { color: var(--muted); max-width: 38em; margin: 0 0 36px; }
 .price-box h2 { margin: 0 0 6px; }
 .price-box p { margin: 0; color: var(--teal-text); }
 
+/* Two store buttons side by side */
+.badges { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* iPhone | Android switch over the step screenshots; without JavaScript the iPhone set shows */
+.platform-switch { display: inline-flex; background: var(--surface); border-radius: 999px; padding: 4px; margin: 0 0 32px;
+  box-shadow: 0 1px 0 var(--line); }
+.platform-switch button { font: inherit; font-size: 15px; font-weight: 600; border: 0; background: none; color: var(--muted);
+  padding: 8px 20px; border-radius: 999px; cursor: pointer; }
+.platform-switch button[aria-pressed="true"] { background: var(--teal); color: #fff; }
+.steps[data-show="ios"] .screen[data-os="android"],
+.steps[data-show="android"] .screen[data-os="ios"] { display: none; }
+
+/* Full-width photo bands with one line */
+section.band { position: relative; padding: 0; height: clamp(360px, 62vh, 620px); overflow: hidden; background: var(--ink); }
+.band img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.band::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(12, 28, 32, 0.72) 0%, rgba(12, 28, 32, 0.25) 45%, rgba(12, 28, 32, 0) 70%); }
+.band .wrap { position: relative; z-index: 1; height: 100%; display: flex; align-items: flex-end; padding-bottom: 48px; }
+.band-line { margin: 0; color: #fff; font-weight: 800; font-size: clamp(26px, 4.2vw, 44px); line-height: 1.15;
+  letter-spacing: -0.02em; max-width: 26ch; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3); }
+
 /* Plain text pages */
 .doc { max-width: 720px; padding: 24px 16px 80px; margin: 0 auto; }
 .doc h1 { font-size: clamp(32px, 5vw, 44px); letter-spacing: -0.02em; line-height: 1.1; margin: 16px 0 8px; }
@@ -152,6 +173,8 @@ section .intro { color: var(--muted); max-width: 38em; margin: 0 0 36px; }
   .steps { grid-template-columns: 1fr; gap: 40px; }
   .steps .screen { max-width: 240px; }
   .site-nav { gap: 14px; }
+  section.band { height: 72vh; max-height: 560px; }
+  .band .wrap { padding-bottom: 32px; }
   section { padding: 48px 0; }
 }
 
