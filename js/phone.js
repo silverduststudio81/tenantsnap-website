@@ -3,6 +3,11 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { N8AOPass } from 'n8ao';
 
 const act = document.querySelector('[data-story]');
 const stage = act.querySelector('[data-sc-stage]');
@@ -24,9 +29,26 @@ try {
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const roomEnv = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;   // soft room: kept for the front glass (see below)
+scene.environment = roomEnv;
 pmrem.dispose();
+// Real photo-studio lighting (Poly Haven, CC0) replaces the generated room once loaded
+new HDRLoader().load('img/studio_small_09_1k.hdr', tex => {
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  scene.environment = tex;
+});
 const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 30);
+
+// Post-processing: ambient occlusion (soft shading in seams), then edge smoothing, then colour output
+const composer = new EffectComposer(renderer);
+const ao = new N8AOPass(scene, camera, 1, 1);
+ao.configuration.aoRadius = 0.06;          // scene units: ~6 mm, so only seams and joints darken
+ao.configuration.distanceFalloff = 0.3;
+ao.configuration.intensity = 2;
+ao.configuration.gammaCorrection = false;  // OutputPass does it
+composer.addPass(ao);
+composer.addPass(new SMAAPass());          // AO turns off the built-in antialiasing
+composer.addPass(new OutputPass());
 const key = new THREE.DirectionalLight(0xffffff, 1.2);
 key.position.set(2, 3, 4);
 scene.add(key);
@@ -51,9 +73,9 @@ function flatShape(w, h, r) {   // 0..1 UVs so a picture fills the shape exactly
   return g;
 }
 
-const frameMat = new THREE.MeshPhysicalMaterial({ color: 0xb9b4aa, metalness: 1, roughness: 0.32 });
-const backMat = new THREE.MeshPhysicalMaterial({ color: 0xcfcac0, roughness: 0.55, clearcoat: 1, clearcoatRoughness: 0.35 });
-const plateMat = new THREE.MeshPhysicalMaterial({ color: 0xcfcac0, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05 });
+const frameMat = new THREE.MeshPhysicalMaterial({ color: 0x4f8f8b, metalness: 1, roughness: 0.32 });
+const backMat = new THREE.MeshPhysicalMaterial({ color: 0x7fb5b0, roughness: 0.55, clearcoat: 1, clearcoatRoughness: 0.35 });
+const plateMat = new THREE.MeshPhysicalMaterial({ color: 0x7fb5b0, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05 });
 const blackGlass = new THREE.MeshPhysicalMaterial({ color: 0x050506, roughness: 0.05, clearcoat: 1 });
 const lensGlass = new THREE.MeshPhysicalMaterial({ color: 0x07070c, roughness: 0.02, clearcoat: 1, iridescence: 0.7, iridescenceIOR: 1.4 });
 const darkPart = new THREE.MeshStandardMaterial({ color: 0x1a1a1c, roughness: 0.6 });
@@ -61,6 +83,8 @@ const coverGlass = new THREE.MeshPhysicalMaterial({   // black base adds nothing
   color: 0x000000, roughness: 0.03, clearcoat: 1, transparent: true,
   blending: THREE.AdditiveBlending, depthWrite: false, envMapIntensity: 0.5
 });
+// Front glass keeps the soft room: tilted back, it would mirror the studio's ceiling lights as blotches
+blackGlass.envMap = coverGlass.envMap = roomEnv;
 
 const phone = new THREE.Group();
 scene.add(phone);
@@ -85,7 +109,7 @@ screen.position.z = FRONT + 0.001;
 phone.add(screen);
 
 // Shutter flash over the screen when a step lands (the snap)
-const flash = new THREE.Mesh(flatShape(SW, SH, SR), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false }));
+const flash = new THREE.Mesh(flatShape(SW, SH, SR), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false, depthWrite: false }));
 flash.position.z = FRONT + 0.0012;
 phone.add(flash);
 
@@ -169,8 +193,12 @@ function drawShot(i) {
 let L;
 function layout() {
   const w = stage.clientWidth, h = stage.clientHeight;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, w < 640 ? 1.5 : 2));
+  const ratio = Math.min(devicePixelRatio, w < 640 ? 1.5 : 2);
+  renderer.setPixelRatio(ratio);
   renderer.setSize(w, h, false);
+  composer.setPixelRatio(ratio);
+  composer.setSize(w, h);
+  ao.configuration.halfRes = w < 640;        // phones: AO at half resolution to keep the frame rate
   camera.aspect = w / h;
   const upright = w / h < 1;                                    // phones and upright tablets: phone on top, words below
   const share = upright ? 0.44 : w < 1180 ? 0.56 : 0.6;        // phone height as a share of the screen height
@@ -206,7 +234,7 @@ renderer.setAnimationLoop(() => {
   if (want !== shown) drawShot(want);
 
   phone.position.set(lerp(L.hx, L.sx, lift), lerp(L.hy, L.sy, lift) + float, 0);
-  phone.rotation.set(0.06 - lift * 0.03, lerp(-0.42, -0.2, lift) + turns * Math.PI * 2 + (still ? 0 : Math.sin(t * 0.5) * 0.04), 0.015);
+  phone.rotation.set(-0.12 + lift * 0.04, lerp(-0.42, -0.2, lift) + turns * Math.PI * 2 + (still ? 0 : Math.sin(t * 0.5) * 0.04), 0.015);   // leans back slightly
   pedestal.position.set(L.hx, L.hy - H / 2 - 0.11 - PED_H / 2 - lift * 2.4, -0.05);
   pedestal.visible = lift < 0.99;
   shadow.material.opacity = 0.9 - float * 6;
@@ -227,7 +255,7 @@ renderer.setAnimationLoop(() => {
   if (px !== lastPx) { stage.style.setProperty('--px', px); lastPx = px; }
   if (lf !== lastLift) { stage.style.setProperty('--lift', lf); lastLift = lf; }
 
-  renderer.render(scene, camera);
+  composer.render();
 });
 
 Promise.all(shots.map(i => i.decode().catch(() => {}))).then(() => { drawShot(0); stage.classList.add('phone-ready'); });
