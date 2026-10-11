@@ -4,10 +4,6 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { N8AOPass } from 'n8ao';
 
 const act = document.querySelector('[data-story]');
 const stage = act.querySelector('[data-sc-stage]');
@@ -32,23 +28,12 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 const roomEnv = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;   // soft room: kept for the front glass (see below)
 scene.environment = roomEnv;
 pmrem.dispose();
-// Real photo-studio lighting (Poly Haven, CC0) replaces the generated room once loaded
-new HDRLoader().load('img/studio_small_09_1k.hdr', tex => {
+// Real photo-studio lighting (Poly Haven, CC0, shrunk to 256x128: rough metal blurs reflections anyway)
+new HDRLoader().load('img/studio_small_09_256.hdr', tex => {
   tex.mapping = THREE.EquirectangularReflectionMapping;
   scene.environment = tex;
 });
 const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 30);
-
-// Post-processing: ambient occlusion (soft shading in seams), then edge smoothing, then colour output
-const composer = new EffectComposer(renderer);
-const ao = new N8AOPass(scene, camera, 1, 1);
-ao.configuration.aoRadius = 0.06;          // scene units: ~6 mm, so only seams and joints darken
-ao.configuration.distanceFalloff = 0.3;
-ao.configuration.intensity = 2;
-ao.configuration.gammaCorrection = false;  // OutputPass does it
-composer.addPass(ao);
-composer.addPass(new SMAAPass());          // AO turns off the built-in antialiasing
-composer.addPass(new OutputPass());
 const key = new THREE.DirectionalLight(0xffffff, 1.2);
 key.position.set(2, 3, 4);
 scene.add(key);
@@ -73,9 +58,9 @@ function flatShape(w, h, r) {   // 0..1 UVs so a picture fills the shape exactly
   return g;
 }
 
-const frameMat = new THREE.MeshPhysicalMaterial({ color: 0x4f8f8b, metalness: 1, roughness: 0.32 });
-const backMat = new THREE.MeshPhysicalMaterial({ color: 0x7fb5b0, roughness: 0.55, clearcoat: 1, clearcoatRoughness: 0.35 });
-const plateMat = new THREE.MeshPhysicalMaterial({ color: 0x7fb5b0, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05 });
+const frameMat = new THREE.MeshPhysicalMaterial({ color: 0x4f8f8b, metalness: 1, roughness: 0.6 });   // matte body: bead-blasted frame, soft-touch back
+const backMat = new THREE.MeshPhysicalMaterial({ color: 0x7fb5b0, roughness: 0.85 });
+const plateMat = new THREE.MeshPhysicalMaterial({ color: 0x7fb5b0, roughness: 0.7 });
 const blackGlass = new THREE.MeshPhysicalMaterial({ color: 0x050506, roughness: 0.05, clearcoat: 1 });
 const lensGlass = new THREE.MeshPhysicalMaterial({ color: 0x07070c, roughness: 0.02, clearcoat: 1, iridescence: 0.7, iridescenceIOR: 1.4 });
 const darkPart = new THREE.MeshStandardMaterial({ color: 0x1a1a1c, roughness: 0.6 });
@@ -193,12 +178,9 @@ function drawShot(i) {
 let L;
 function layout() {
   const w = stage.clientWidth, h = stage.clientHeight;
-  const ratio = Math.min(devicePixelRatio, w < 640 ? 1.5 : 2);
+  const ratio = Math.min(devicePixelRatio, 2);   // phones are 3x: 2x stays sharp, and the browser smooths it down
   renderer.setPixelRatio(ratio);
   renderer.setSize(w, h, false);
-  composer.setPixelRatio(ratio);
-  composer.setSize(w, h);
-  ao.configuration.halfRes = w < 640;        // phones: AO at half resolution to keep the frame rate
   camera.aspect = w / h;
   const upright = w / h < 1;                                    // phones and upright tablets: phone on top, words below
   const share = upright ? 0.44 : w < 1180 ? 0.56 : 0.6;        // phone height as a share of the screen height
@@ -255,7 +237,8 @@ renderer.setAnimationLoop(() => {
   if (px !== lastPx) { stage.style.setProperty('--px', px); lastPx = px; }
   if (lf !== lastLift) { stage.style.setProperty('--lift', lf); lastLift = lf; }
 
-  composer.render();
+  renderer.render(scene, camera);
 });
 
-Promise.all(shots.map(i => i.decode().catch(() => {}))).then(() => { drawShot(0); stage.classList.add('phone-ready'); });
+// Show the phone once the first screen is ready; the other two keep loading (drawShot retries each frame)
+shots[0].decode().catch(() => {}).then(() => { drawShot(0); stage.classList.add('phone-ready'); });
